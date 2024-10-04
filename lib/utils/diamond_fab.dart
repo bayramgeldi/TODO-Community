@@ -25,13 +25,13 @@ class DiamondFab extends StatefulWidget {
   final BoxConstraints _sizeConstraints;
 
   DiamondFab({
-    Key key,
-    this.child,
+    Key? key,
+    required this.child,
     this.notchMargin: 8.0,
-    this.backgroundColor,
-    @required this.onPressed,
-    this.foregroundColor,
-    this.tooltip,
+    required this.backgroundColor,
+    required this.onPressed,
+    required this.foregroundColor,
+    required this.tooltip,
     this.heroTag: const _DefaultHeroTag(),
     this.highlightElevation: 12.0,
     this.mini: false,
@@ -49,13 +49,13 @@ class DiamondFab extends StatefulWidget {
 
 class DiamondFabState extends State<DiamondFab> {
   bool _hightlight = false;
-  VoidCallback _notchChange;
+  late VoidCallback _notchChange;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
     final Color foregroundColor =
-        widget.foregroundColor ?? theme.accentIconTheme.color;
+        widget.foregroundColor;
     Widget result;
 
     if (widget.child != null) {
@@ -80,7 +80,7 @@ class DiamondFabState extends State<DiamondFab> {
       onHighlightChanged: _handleHightlightChanged,
       elevation: _hightlight ? widget.highlightElevation : widget.elevation,
       constraints: widget._sizeConstraints,
-      fillColor: widget.backgroundColor ?? theme.accentColor,
+      fillColor: widget.backgroundColor ?? theme.colorScheme.secondary,
       textStyle: theme.accentTextTheme.button.copyWith(
         color: foregroundColor,
         letterSpacing: 1.2,
@@ -131,12 +131,12 @@ class _DiamondBorder extends ShapeBorder {
   EdgeInsetsGeometry get dimensions => EdgeInsets.only();
 
   @override
-  Path getInnerPath(Rect rect, {TextDirection textDirection}) {
+  Path getInnerPath(Rect rect, {required TextDirection textDirection}) {
     return getOuterPath(rect, textDirection: textDirection);
   }
 
   @override
-  Path getOuterPath(Rect rect, {TextDirection textDirection}) {
+  Path getOuterPath(Rect rect, {required TextDirection textDirection}) {
     return Path()
       ..moveTo(rect.left + rect.width / 2.0, rect.top)
       ..lineTo(rect.right, rect.top + rect.height / 2.0)
@@ -146,10 +146,10 @@ class _DiamondBorder extends ShapeBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {TextDirection textDirection}) {}
+  void paint(Canvas canvas, Rect rect, {required TextDirection textDirection}) {}
 
   @override
-  ShapeBorder scale(double t) {
+  ShapeBorder? scale(double t) {
     return null;
   }
 }
