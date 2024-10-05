@@ -1,3 +1,6 @@
+
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -5,15 +8,23 @@ import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:taskist/model/element.dart';
+import 'package:taskist/model/task.dart';
 import 'package:taskist/utils/diamond_fab.dart';
 
 class DetailPage extends StatefulWidget {
-  final FirebaseUser user;
+  final User user;
   final int i;
+  final Task task;
   final Map<String, List<ElementTask>> currentList;
   final String color;
 
-  DetailPage({Key key, this.user, this.i, this.currentList, this.color})
+  DetailPage(
+      {required Key key,
+      required this.user,
+      required this.i,
+      required this.task,
+      required this.currentList,
+      required this.color})
       : super(key: key);
 
   @override
@@ -34,10 +45,11 @@ class _DetailPageState extends State<DetailPage> {
           Container(
             child: NotificationListener<OverscrollIndicatorNotification>(
               onNotification: (overscroll) {
-                overscroll.disallowGlow();
+                overscroll.disallowIndicator();
+                return false;
               },
               child: new StreamBuilder<QuerySnapshot>(
-                  stream: Firestore.instance
+                  stream: FirebaseFirestore.instance
                       .collection(widget.user.uid)
                       .snapshots(),
                   builder: (BuildContext context,
@@ -67,10 +79,13 @@ class _DetailPageState extends State<DetailPage> {
                       child: new TextField(
                         autofocus: true,
                         decoration: InputDecoration(
-                            border: new OutlineInputBorder(
-                                borderSide: new BorderSide(
-                                    color: currentColor)),
+                            border: new OutlineInputBorder(),
+                            focusColor: currentColor,
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: currentColor),
+                            ),
                             labelText: "Item",
+                            labelStyle: TextStyle(color: currentColor),
                             hintText: "Item",
                             contentPadding: EdgeInsets.only(
                                 left: 16.0,
@@ -92,26 +107,28 @@ class _DetailPageState extends State<DetailPage> {
                 actions: <Widget>[
                   ButtonTheme(
                     //minWidth: double.infinity,
-                    child: RaisedButton(
-                      elevation: 3.0,
+                    child: ElevatedButton(
                       onPressed: () {
                         if (itemController.text.isNotEmpty &&
                             !widget.currentList.values
                                 .contains(itemController.text.toString())) {
-                          Firestore.instance
-                              .collection(widget.user.uid)
-                              .document(
-                                  widget.currentList.keys.elementAt(widget.i))
-                              .updateData(
-                                  {itemController.text.toString(): false});
+                          //add new item to the task
+                          var taskElements = widget.task.elements;
+                          taskElements.add(ElementTask(name: itemController.text.toString(), isDone: false));
+
+                          FirebaseFirestore.instance.collection(widget.user.uid).doc(widget.currentList.keys.elementAt(widget.i)).update({"elements": taskElements.map((e) => e.toJson()).toList()});
 
                           itemController.clear();
                           Navigator.of(context).pop();
                         }
                       },
                       child: Text('Add'),
-                      color: currentColor,
-                      textColor: const Color(0xffffffff),
+                      style: ElevatedButton.styleFrom(
+                        foregroundColor: Colors.white,
+                        backgroundColor: currentColor,
+                        disabledForegroundColor: Colors.grey.withOpacity(0.38),
+                        disabledBackgroundColor: Colors.grey.withOpacity(0.12),
+                      ),
                     ),
                   )
                 ],
@@ -121,6 +138,8 @@ class _DetailPageState extends State<DetailPage> {
         },
         child: Icon(Icons.add),
         backgroundColor: currentColor,
+        foregroundColor: Colors.white,
+        tooltip: 'Add new item',
       ),
     );
   }
@@ -131,17 +150,14 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   getExpenseItems(AsyncSnapshot<QuerySnapshot> snapshot) {
-    List<ElementTask> listElement = new List();
+    List<ElementTask> listElement = [];
     int nbIsDone = 0;
 
     if (widget.user.uid.isNotEmpty) {
-      snapshot.data.documents.map<Column>((f) {
-        if (f.documentID == widget.currentList.keys.elementAt(widget.i)) {
-          f.data.forEach((a, b) {
-            if (b.runtimeType == bool) {
-              listElement.add(new ElementTask(a, b));
-            }
-          });
+      snapshot.data!.docs.map((QueryDocumentSnapshot f) {
+        if (f.id == widget.currentList.keys.elementAt(widget.i)) {
+          var task = Task.fromQueryDocumentSnapshot(f);
+          listElement = task.elements;
         }
       }).toList();
 
@@ -178,38 +194,41 @@ class _DetailPageState extends State<DetailPage> {
                             context: context,
                             builder: (BuildContext context) {
                               return new AlertDialog(
-                                title: Text("Delete: " + widget.currentList.keys.elementAt(widget.i).toString()),
+                                title: Text("Delete: " +
+                                    widget.currentList.keys
+                                        .elementAt(widget.i)
+                                        .toString()),
                                 content: Text(
-                                    "Are you sure you want to delete this list?", style: TextStyle(fontWeight: FontWeight.w400),),
+                                  "Are you sure you want to delete this list?",
+                                  style: TextStyle(fontWeight: FontWeight.w400),
+                                ),
                                 actions: <Widget>[
                                   ButtonTheme(
                                     //minWidth: double.infinity,
-                                    child: RaisedButton(
-                                      elevation: 3.0,
+                                    child: ElevatedButton(
                                       onPressed: () {
                                         Navigator.pop(context);
                                       },
                                       child: Text('No'),
-                                      color: currentColor,
-                                      textColor: const Color(0xffffffff),
+                                      //color: currentColor,
+                                      //textColor: const Color(0xffffffff),
                                     ),
                                   ),
                                   ButtonTheme(
                                     //minWidth: double.infinity,
-                                    child: RaisedButton(
-                                      elevation: 3.0,
+                                    child: ElevatedButton(
                                       onPressed: () {
-                                        Firestore.instance
+                                        FirebaseFirestore.instance
                                             .collection(widget.user.uid)
-                                            .document(widget.currentList.keys
-                                            .elementAt(widget.i))
+                                            .doc(widget.currentList.keys
+                                                .elementAt(widget.i))
                                             .delete();
                                         Navigator.pop(context);
                                         Navigator.of(context).pop();
                                       },
                                       child: Text('YES'),
-                                      color: currentColor,
-                                      textColor: const Color(0xffffffff),
+                                      //color: currentColor,
+                                      //textColor: const Color(0xffffffff),
                                     ),
                                   ),
                                 ],
@@ -259,98 +278,105 @@ class _DetailPageState extends State<DetailPage> {
                   padding: EdgeInsets.only(top: 30.0),
                   child: Column(
                     children: <Widget>[
-                      Container(color: Color(0xFFFCFCFC),child:
-                      SizedBox(
-                        height: MediaQuery.of(context).size.height - 350,
-                        child: ListView.builder(
-                            physics: const BouncingScrollPhysics(),
-                            itemCount: listElement.length,
-                            itemBuilder: (BuildContext ctxt, int i) {
-                              return new Slidable(
-                                delegate: new SlidableBehindDelegate(),
-                                actionExtentRatio: 0.25,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Firestore.instance
-                                        .collection(widget.user.uid)
-                                        .document(widget.currentList.keys
-                                            .elementAt(widget.i))
-                                        .updateData({
-                                      listElement.elementAt(i).name:
-                                          !listElement.elementAt(i).isDone
-                                    });
-                                  },
-                                  child: Container(
-                                    height: 50.0,
-                                    color: listElement.elementAt(i).isDone
-                                        ? Color(0xFFF0F0F0)
-                                        : Color(0xFFFCFCFC),
-                                    child: Padding(
-                                      padding: EdgeInsets.only(left: 50.0),
-                                      child: Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.start,
-                                        children: <Widget>[
-                                          Icon(
-                                            listElement.elementAt(i).isDone
-                                                ? FontAwesomeIcons.checkSquare
-                                                : FontAwesomeIcons.square,
-                                            color: listElement
-                                                    .elementAt(i)
-                                                    .isDone
-                                                ? currentColor
-                                                : Colors.black,
-                                            size: 20.0,
-                                          ),
-                                          Padding(
-                                            padding:
-                                                EdgeInsets.only(left: 30.0),
-                                          ),
-                                          Flexible(
-                                            child: Text(
-                                              listElement.elementAt(i).name,
-                                              overflow: TextOverflow.ellipsis,
-                                              maxLines: 1,
-                                              style: listElement
+                      Container(
+                        color: Color(0xFFFCFCFC),
+                        child: SizedBox(
+                          height: MediaQuery.of(context).size.height - 350,
+                          child: ListView.builder(
+                              physics: const BouncingScrollPhysics(),
+                              itemCount: listElement.length,
+                              itemBuilder: (BuildContext ctxt, int i) {
+                                return new Slidable(
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      log("done: "+i.toString());
+                                      log(listElement.elementAt(i).toString());
+                                      var taskElement = listElement.elementAt(i);
+                                      taskElement.isDone = !taskElement.isDone;
+                                      listElement[i] = taskElement;
+                                      FirebaseFirestore.instance
+                                          .collection(widget.user.uid)
+                                          .doc(widget.currentList.keys
+                                              .elementAt(widget.i))
+                                          .update({"elements": listElement.map((e) => e.toJson()).toList()});
+                                    },
+                                    child: Container(
+                                      height: 50.0,
+                                      color: listElement.elementAt(i).isDone
+                                          ? Color(0xFFF0F0F0)
+                                          : Color(0xFFFCFCFC),
+                                      child: Padding(
+                                        padding: EdgeInsets.only(left: 50.0),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: <Widget>[
+                                            Icon(
+                                              listElement.elementAt(i).isDone
+                                                  ? FontAwesomeIcons.squareCheck
+                                                  : FontAwesomeIcons.square,
+                                              color: listElement
                                                       .elementAt(i)
                                                       .isDone
-                                                  ? TextStyle(
-                                                      decoration: TextDecoration
-                                                          .lineThrough,
-                                                      color: currentColor,
-                                                      fontSize: 27.0,
-                                                    )
-                                                  : TextStyle(
-                                                      color: Colors.black,
-                                                      fontSize: 27.0,
-                                                    ),
+                                                  ? currentColor
+                                                  : Colors.black,
+                                              size: 20.0,
                                             ),
-                                          ),
-                                        ],
+                                            Padding(
+                                              padding:
+                                                  EdgeInsets.only(left: 30.0),
+                                            ),
+                                            Flexible(
+                                              child: Text(
+                                                listElement.elementAt(i).name,
+                                                overflow: TextOverflow.ellipsis,
+                                                maxLines: 1,
+                                                style: listElement
+                                                        .elementAt(i)
+                                                        .isDone
+                                                    ? TextStyle(
+                                                        decoration:
+                                                            TextDecoration
+                                                                .lineThrough,
+                                                        color: currentColor,
+                                                        fontSize: 27.0,
+                                                      )
+                                                    : TextStyle(
+                                                        color: Colors.black,
+                                                        fontSize: 27.0,
+                                                      ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                                secondaryActions: <Widget>[
-                                  new IconSlideAction(
-                                    caption: 'Delete',
-                                    color: Colors.red,
-                                    icon: Icons.delete,
-                                    onTap: () {
-                                        Firestore.instance
-                                            .collection(widget.user.uid)
-                                            .document(widget.currentList.keys
-                                            .elementAt(widget.i))
-                                            .updateData({
-                                          listElement.elementAt(i).name:
-                                          ""
-                                        });
-                                    },
+                                  endActionPane: ActionPane(
+                                    motion: ScrollMotion(),
+                                    children: <Widget>[
+                                      SlidableAction(
+                                        flex: 1,
+                                        autoClose: true,
+                                        onPressed: (context) {
+                                          FirebaseFirestore.instance
+                                              .collection(widget.user.uid)
+                                              .doc(widget.currentList.keys
+                                                  .elementAt(widget.i))
+                                              .update({
+                                            listElement.elementAt(i).name: false
+                                          });
+                                        },
+                                        foregroundColor: Colors.red,
+                                        backgroundColor: Colors.transparent,
+                                        icon: Icons.delete,
+                                      ),
+                                    ],
                                   ),
-                                ],
-                              );
-                            }),
-                      ),),
+                                );
+                              }),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -369,10 +395,10 @@ class _DetailPageState extends State<DetailPage> {
     currentColor = Color(int.parse(widget.color));
   }
 
-  Color pickerColor;
-  Color currentColor;
+  late Color pickerColor;
+  late Color currentColor;
 
-  ValueChanged<Color> onColorChanged;
+  late ValueChanged<Color> onColorChanged;
 
   changeColor(Color color) {
     setState(() => pickerColor = color);
@@ -383,14 +409,12 @@ class _DetailPageState extends State<DetailPage> {
       padding: EdgeInsets.only(top: 50.0, left: 20.0, right: 12.0),
       child:
           new Row(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
-            new Image(
-                width: 35.0,
-                height: 35.0,
-                fit: BoxFit.cover,
-                image: new AssetImage('assets/list.png')
-            ),
-        RaisedButton(
-          elevation: 3.0,
+        new Image(
+            width: 35.0,
+            height: 35.0,
+            fit: BoxFit.cover,
+            image: new AssetImage('assets/list.png')),
+        ElevatedButton(
           onPressed: () {
             pickerColor = currentColor;
             showDialog(
@@ -402,25 +426,20 @@ class _DetailPageState extends State<DetailPage> {
                     child: ColorPicker(
                       pickerColor: pickerColor,
                       onColorChanged: changeColor,
-                      enableLabel: true,
-                      colorPickerWidth: 1000.0,
-                      pickerAreaHeightPercent: 0.7,
+                      enableAlpha: false,
+                      paletteType: PaletteType.hueWheel,
                     ),
                   ),
                   actions: <Widget>[
-                    FlatButton(
+                    TextButton(
                       child: Text('Got it'),
                       onPressed: () {
-
-                        Firestore.instance
+                        FirebaseFirestore.instance
                             .collection(widget.user.uid)
-                            .document(
-                            widget.currentList.keys.elementAt(widget.i))
-                            .updateData(
-                            {"color": pickerColor.value.toString()});
+                            .doc(widget.currentList.keys.elementAt(widget.i))
+                            .update({"color": pickerColor.value.toString()});
 
-                        setState(
-                                () => currentColor = pickerColor);
+                        setState(() => currentColor = pickerColor);
                         Navigator.of(context).pop();
                       },
                     ),
@@ -430,8 +449,8 @@ class _DetailPageState extends State<DetailPage> {
             );
           },
           child: Text('Color'),
-          color: currentColor,
-          textColor: const Color(0xffffffff),
+          //color: currentColor,
+          //textColor: const Color(0xffffffff),
         ),
         GestureDetector(
           onTap: () {

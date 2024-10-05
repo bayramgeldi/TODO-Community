@@ -7,25 +7,32 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:taskist/ui/page_done.dart';
 import 'package:taskist/ui/page_settings.dart';
 import 'package:taskist/ui/page_task.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 Future<Null> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   _currentUser = await _signInAnonymously();
 
   runApp(new TaskistApp());
 }
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
-FirebaseUser _currentUser;
+late User _currentUser;
 
-Future<FirebaseUser> _signInAnonymously() async {
-  final user = await _auth.signInAnonymously();
-  return user;
+Future<User> _signInAnonymously() async {
+  final userCredential = await _auth.signInAnonymously();
+
+  return userCredential.user!;
 }
 
 class HomePage extends StatefulWidget {
-  final FirebaseUser user;
+  final User user;
 
-  HomePage({Key key, this.user}) : super(key: key);
+  HomePage({required Key key, required this.user}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _HomePageState();
@@ -38,7 +45,7 @@ class TaskistApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: "Taskist",
       home: HomePage(
-        user: _currentUser,
+        user: _currentUser, key: Key("HomePage"),
       ),
       theme: new ThemeData(primarySwatch: Colors.blue),
     );
@@ -51,13 +58,13 @@ class _HomePageState extends State<HomePage>
 
   final List<Widget> _children = [
     DonePage(
-      user: _currentUser,
+      user: _currentUser, key: Key("DonePage"),
     ),
     TaskPage(
-      user: _currentUser,
+      user: _currentUser, key: Key("TaskPage"),
     ),
     SettingsPage(
-      user: _currentUser,
+      user: _currentUser, key: Key("SettingsPage"),
     )
   ];
 
@@ -71,11 +78,11 @@ class _HomePageState extends State<HomePage>
         items: <BottomNavigationBarItem>[
           BottomNavigationBarItem(
               icon: new Icon(FontAwesomeIcons.calendarCheck),
-              title: new Text("")),
+              label:""),
           BottomNavigationBarItem(
-              icon: new Icon(FontAwesomeIcons.calendar), title: new Text("")),
+              icon: new Icon(FontAwesomeIcons.calendar), label: ""),
           BottomNavigationBarItem(
-              icon: new Icon(FontAwesomeIcons.slidersH), title: new Text(""))
+              icon: new Icon(FontAwesomeIcons.sliders), label: "")
         ],
       ),
       body: _children[_currentIndex],

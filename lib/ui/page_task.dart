@@ -1,17 +1,20 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:taskist/model/element.dart';
+import 'package:taskist/model/task.dart';
 import 'package:taskist/ui/page_detail.dart';
 
 import 'page_addlist.dart';
 
 class TaskPage extends StatefulWidget {
-  final FirebaseUser user;
+  final User user;
 
-  TaskPage({Key key, this.user}) : super(key: key);
+  TaskPage({required Key key, required this.user}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _TaskPageState();
@@ -102,10 +105,11 @@ class _TaskPageState extends State<TaskPage>
               padding: EdgeInsets.only(bottom: 25.0),
               child: NotificationListener<OverscrollIndicatorNotification>(
                 onNotification: (overscroll) {
-                  overscroll.disallowGlow();
+                  overscroll.disallowIndicator();
+                  return false;
                 },
                 child: new StreamBuilder<QuerySnapshot>(
-                    stream: Firestore.instance
+                    stream: FirebaseFirestore.instance
                         .collection(widget.user.uid)
                         .orderBy("date", descending: true)
                         .snapshots(),
@@ -137,38 +141,50 @@ class _TaskPageState extends State<TaskPage>
   }
 
   getExpenseItems(AsyncSnapshot<QuerySnapshot> snapshot) {
-    List<ElementTask> listElement = new List(), listElement2;
+    List<ElementTask> listElement = [], listElement2;
     Map<String, List<ElementTask>> userMap = new Map();
 
-    List<String> cardColor = new List();
+    List<String> cardColor = [];
+    late Task task;
 
     if (widget.user.uid.isNotEmpty) {
       cardColor.clear();
 
-      snapshot.data.documents.map<List>((f) {
-        String color;
-        f.data.forEach((a, b) {
-          if (b.runtimeType == bool) {
-            listElement.add(new ElementTask(a, b));
+
+        snapshot.data?.docs.map((QueryDocumentSnapshot f) {
+          log(f.data().runtimeType.toString());
+          log(f.get("title"));
+          task = Task.fromQueryDocumentSnapshot(f);
+          listElement = task.elements;
+          late String color;
+          //add dummy data
+          //listElement.add(new ElementTask("Task 1", false));
+          color = task.color;
+
+          /*f.data().forEach((a, b) {
+            if (b.runtimeType == bool) {
+              listElement.add(new ElementTask(a, b));
+            }
+            if (b.runtimeType == String && a == "color") {
+              color = b;
+            }
+          });*/
+          listElement2 = new List<ElementTask>.from(listElement);
+          for (int i = 0; i < listElement2.length; i++) {
+            if (listElement2
+                .elementAt(i)
+                .isDone == false) {
+              userMap[f.id] = listElement2;
+              cardColor.add(color);
+              break;
+            }
           }
-          if (b.runtimeType == String && a == "color") {
-            color = b;
-          }
-        });
-        listElement2 = new List<ElementTask>.from(listElement);
-        for (int i = 0; i < listElement2.length; i++) {
-          if (listElement2.elementAt(i).isDone == false) {
-            userMap[f.documentID] = listElement2;
+          if (listElement2.length == 0) {
+            userMap[f.id] = listElement2;
             cardColor.add(color);
-            break;
           }
-        }
-        if (listElement2.length == 0) {
-          userMap[f.documentID] = listElement2;
-          cardColor.add(color);
-        }
-        listElement.clear();
-      }).toList();
+          listElement.clear();
+        }).toList() ?? [];
 
       return new List.generate(userMap.length, (int index) {
         return new GestureDetector(
@@ -178,8 +194,9 @@ class _TaskPageState extends State<TaskPage>
                 pageBuilder: (_, __, ___) => new DetailPage(
                       user: widget.user,
                       i: index,
+                      task: task,
                       currentList: userMap,
-                      color: cardColor.elementAt(index),
+                      color: cardColor.elementAt(index), key: UniqueKey(),
                     ),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) =>
@@ -275,7 +292,7 @@ class _TaskPageState extends State<TaskPage>
                                                 .elementAt(index)
                                                 .elementAt(i)
                                                 .isDone
-                                            ? FontAwesomeIcons.checkCircle
+                                            ? FontAwesomeIcons.circleCheck
                                             : FontAwesomeIcons.circle,
                                         color: userMap.values
                                                 .elementAt(index)
@@ -341,7 +358,7 @@ class _TaskPageState extends State<TaskPage>
     Navigator.of(context).push(
       new PageRouteBuilder(
         pageBuilder: (_, __, ___) => new NewTaskPage(
-              user: widget.user,
+              user: widget.user, key: new Key('NewTaskPage'),
             ),
         transitionsBuilder: (context, animation, secondaryAnimation, child) =>
             new ScaleTransition(
