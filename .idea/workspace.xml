@@ -9,17 +9,14 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d72d5de6-a713-4718-bcab-1e3972bee4f1" name="Default" comment="">
-      <change beforePath="$PROJECT_DIR$/.flutter-plugins-dependencies" beforeDir="false" afterPath="$PROJECT_DIR$/.flutter-plugins-dependencies" afterDir="false" />
+    <list default="true" id="d72d5de6-a713-4718-bcab-1e3972bee4f1" name="Default" comment="upgrade and some compatibility fixes">
+      <change afterPath="$PROJECT_DIR$/lib/model/task.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ios/Flutter/flutter_export_environment.sh" beforeDir="false" afterPath="$PROJECT_DIR$/ios/Flutter/flutter_export_environment.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/main.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/main.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/lib/model/element.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/model/element.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/ui/page_addlist.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ui/page_addlist.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/ui/page_detail.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ui/page_detail.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/ui/page_done.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ui/page_done.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/page_settings.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ui/page_settings.dart" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/lib/ui/page_task.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ui/page_task.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/utils/diamond_fab.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/utils/diamond_fab.dart" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -298,6 +295,15 @@
       <option name="presentableId" value="Default" />
       <updated>1536080544339</updated>
     </task>
+    <task id="LOCAL-00001" summary="upgrade and some compatibility fixes">
+      <option name="closed" value="true" />
+      <created>1728118676046</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1728118676046</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -336,6 +342,10 @@
       <window_info anchor="right" id="Preview" order="8" />
       <window_info anchor="right" id="Fabric" order="9" />
     </layout>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="upgrade and some compatibility fixes" />
+    <option name="LAST_COMMIT_MESSAGE" value="upgrade and some compatibility fixes" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml">

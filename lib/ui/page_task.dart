@@ -1,9 +1,12 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:taskist/model/element.dart';
+import 'package:taskist/model/task.dart';
 import 'package:taskist/ui/page_detail.dart';
 
 import 'page_addlist.dart';
@@ -142,16 +145,21 @@ class _TaskPageState extends State<TaskPage>
     Map<String, List<ElementTask>> userMap = new Map();
 
     List<String> cardColor = [];
+    late Task task;
 
     if (widget.user.uid.isNotEmpty) {
       cardColor.clear();
 
 
-        snapshot.data?.docs.map((f) {
+        snapshot.data?.docs.map((QueryDocumentSnapshot f) {
+          log(f.data().runtimeType.toString());
+          log(f.get("title"));
+          task = Task.fromQueryDocumentSnapshot(f);
+          listElement = task.elements;
           late String color;
           //add dummy data
-          listElement.add(new ElementTask("Task 1", false));
-          color = "0xff" + "FF" + "4081";
+          //listElement.add(new ElementTask("Task 1", false));
+          color = task.color;
 
           /*f.data().forEach((a, b) {
             if (b.runtimeType == bool) {
@@ -186,6 +194,7 @@ class _TaskPageState extends State<TaskPage>
                 pageBuilder: (_, __, ___) => new DetailPage(
                       user: widget.user,
                       i: index,
+                      task: task,
                       currentList: userMap,
                       color: cardColor.elementAt(index), key: UniqueKey(),
                     ),

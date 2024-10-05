@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:taskist/model/element.dart';
+import 'package:taskist/model/task.dart';
 import 'package:taskist/ui/page_detail.dart';
 
 class DonePage extends StatefulWidget {
@@ -113,14 +114,17 @@ class _DonePageState extends State<DonePage>
     Map<String, List<ElementTask>> userMap = new Map();
 
     List<String> cardColor = [];
+    late Task task;
     if (widget.user.uid.isNotEmpty) {
       cardColor.clear();
 
       snapshot.data?.docs.map((f) {
-
+        task = Task.fromQueryDocumentSnapshot(f);
         //add dummy data
-        listElement.add(new ElementTask("Task 1", false));
-       /* f.data!.forEach((a, b) {
+        //listElement.add(new ElementTask("Task 1", false));
+        listElement  = task.elements;
+        cardColor.add(task.color);
+        /* f.data!.forEach((a, b) {
           if (b.runtimeType == bool) {
             listElement.add(new ElementTask(a, b));
           }
@@ -156,6 +160,7 @@ class _DonePageState extends State<DonePage>
                 pageBuilder: (_, __, ___) => new DetailPage(
                       user: widget.user,
                       i: index,
+                      task: task,
                       currentList: userMap,
                       color: cardColor.elementAt(index), key: Key("done"),
                     ),

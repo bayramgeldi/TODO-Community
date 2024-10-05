@@ -7,8 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
-
-
+import 'package:taskist/model/task.dart';
 
 class NewTaskPage extends StatefulWidget {
   final User user;
@@ -63,17 +62,16 @@ class _NewTaskPageState extends State<NewTaskPage> {
 
     print(_connectionStatus);
 
-    if(_connectionStatus == "ConnectivityResult.none"){
+    if (_connectionStatus == "ConnectivityResult.none") {
       showInSnackBar("No internet connection currently available");
       setState(() {
         _saving = false;
       });
     } else {
-
       bool isExist = false;
 
       QuerySnapshot query =
-      await FirebaseFirestore.instance.collection(widget.user.uid).get();
+          await FirebaseFirestore.instance.collection(widget.user.uid).get();
 
       query.docs.forEach((doc) {
         if (listNameController.text.toString() == doc.id) {
@@ -82,13 +80,29 @@ class _NewTaskPageState extends State<NewTaskPage> {
       });
 
       if (isExist == false && listNameController.text.isNotEmpty) {
+        var task = Task(
+            title: listNameController.text.toString().trim(),
+            description: "",
+            color: currentColor.value.toString(),
+            date: DateTime.now(),
+            elements: []);
         await FirebaseFirestore.instance
             .collection(widget.user.uid)
             .doc(listNameController.text.toString().trim())
-            .set({
-          "color": currentColor.value.toString(),
-          "date": DateTime.now().millisecondsSinceEpoch
-        });
+            .set(task.toJson());
+
+        if (isExist == true) {
+          showInSnackBar("This list already exists");
+          setState(() {
+            _saving = false;
+          });
+        }
+        if (listNameController.text.isEmpty) {
+          showInSnackBar("Please enter a name");
+          setState(() {
+            _saving = false;
+          });
+        }
 
         listNameController.clear();
 
@@ -97,18 +111,7 @@ class _NewTaskPageState extends State<NewTaskPage> {
 
         Navigator.of(context).pop();
       }
-      if (isExist == true) {
-        showInSnackBar("This list already exists");
-        setState(() {
-          _saving = false;
-        });
-      }
-      if (listNameController.text.isEmpty) {
-        showInSnackBar("Please enter a name");
-        setState(() {
-          _saving = false;
-        });
-      }
+
     }
   }
 
@@ -171,9 +174,7 @@ class _NewTaskPageState extends State<NewTaskPage> {
                         children: <Widget>[
                           new TextFormField(
                             decoration: InputDecoration(
-                                border: new OutlineInputBorder(
-                                    borderSide:
-                                        new BorderSide(color: Colors.teal)),
+                                border: new OutlineInputBorder(),
                                 labelText: "List name",
                                 contentPadding: EdgeInsets.only(
                                     left: 16.0,
@@ -206,10 +207,10 @@ class _NewTaskPageState extends State<NewTaskPage> {
                                       title: const Text('Pick a color!'),
                                       content: SingleChildScrollView(
                                         child: ColorPicker(
+                                          enableAlpha: false,
+                                          paletteType: PaletteType.hueWheel,
                                           pickerColor: pickerColor,
                                           onColorChanged: changeColor,
-                                          colorPickerWidth: 1000.0,
-                                          pickerAreaHeightPercent: 0.7,
                                         ),
                                       ),
                                       actions: <Widget>[
@@ -239,10 +240,14 @@ class _NewTaskPageState extends State<NewTaskPage> {
                       child: new Column(
                         children: <Widget>[
                           new ElevatedButton(
-                            child: const Text(
-                              'Add',
-                              style: TextStyle(color: Colors.white),
+                            style: ElevatedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              backgroundColor: currentColor,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30.0),
+                              ),
                             ),
+                            child: Text('Add'),
                             //color: Colors.blue,
                             //elevation: 4.0,
                             //splashColor: Colors.deepPurple,
@@ -274,18 +279,18 @@ class _NewTaskPageState extends State<NewTaskPage> {
   void initState() {
     super.initState();
     initConnectivity();
-    _connectivitySubscription =
-        _connectivity.onConnectivityChanged.listen((List<ConnectivityResult> results) {
-          setState(() {
-            _connectionStatus = results.first.toString();
-          });
-        });
+    _connectivitySubscription = _connectivity.onConnectivityChanged
+        .listen((List<ConnectivityResult> results) {
+      setState(() {
+        _connectionStatus = results.first.toString();
+      });
+    });
   }
 
   void showInSnackBar(String value) {
-  ScaffoldMessenger.of(context).hideCurrentSnackBar();
+    ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
-  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
       content: Text(value, textAlign: TextAlign.center),
       backgroundColor: currentColor,
       duration: Duration(seconds: 3),
