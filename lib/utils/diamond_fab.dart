@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-const BoxConstraints _kMiniSizeConstraints = const BoxConstraints.tightFor(
+const BoxConstraints _kMiniSizeConstraints = BoxConstraints.tightFor(
   width: 52.0,
   height: 52.0,
 );
 
-const BoxConstraints _kSizeConstraints = const BoxConstraints.tightFor(
+const BoxConstraints _kSizeConstraints = BoxConstraints.tightFor(
   width: 68.0,
   height: 68.0,
 );
@@ -27,20 +27,16 @@ class DiamondFab extends StatefulWidget {
   DiamondFab({
     Key? key,
     required this.child,
-    this.notchMargin: 8.0,
+    this.notchMargin = 8.0,
     required this.backgroundColor,
     required this.onPressed,
     required this.foregroundColor,
     required this.tooltip,
-    this.heroTag: const _DefaultHeroTag(),
-    this.highlightElevation: 12.0,
-    this.mini: false,
-    this.elevation: 6.0,
-  })  : assert(elevation != null),
-        assert(highlightElevation != null),
-        assert(mini != null),
-        assert(notchMargin != null),
-        _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
+    this.heroTag = const _DefaultHeroTag(),
+    this.highlightElevation = 12.0,
+    this.mini = false,
+    this.elevation = 6.0,
+  })  : _sizeConstraints = mini ? _kMiniSizeConstraints : _kSizeConstraints,
         super(key: key);
 
   @override
@@ -48,26 +44,21 @@ class DiamondFab extends StatefulWidget {
 }
 
 class DiamondFabState extends State<DiamondFab> {
-  bool _hightlight = false;
-  late VoidCallback _notchChange;
+  bool _highlight = false;
+  VoidCallback? _notchChange;
 
   @override
   Widget build(BuildContext context) {
     final ThemeData theme = Theme.of(context);
-    final Color foregroundColor =
-        widget.foregroundColor;
-    Widget result;
+    final Color foregroundColor = widget.foregroundColor;
+    Widget result = IconTheme.merge(
+      data: IconThemeData(
+        color: foregroundColor,
+      ),
+      child: widget.child,
+    );
 
-    if (widget.child != null) {
-      result = IconTheme.merge(
-        data: IconThemeData(
-          color: foregroundColor,
-        ),
-        child: widget.child,
-      );
-    }
-
-    if (widget.tooltip != null) {
+    if (widget.tooltip.isNotEmpty) {
       final Widget tooltip = Tooltip(
         message: widget.tooltip,
         child: result,
@@ -77,32 +68,28 @@ class DiamondFabState extends State<DiamondFab> {
 
     result = RawMaterialButton(
       onPressed: widget.onPressed,
-      onHighlightChanged: _handleHightlightChanged,
-      elevation: _hightlight ? widget.highlightElevation : widget.elevation,
+      onHighlightChanged: _handleHighlightChanged,
+      elevation: _highlight ? widget.highlightElevation : widget.elevation,
       constraints: widget._sizeConstraints,
-      fillColor: widget.backgroundColor ?? theme.colorScheme.secondary,
-      textStyle: theme.accentTextTheme.button.copyWith(
-        color: foregroundColor,
-        letterSpacing: 1.2,
-      ),
+      fillColor: widget.backgroundColor,
+      textStyle: theme.textTheme.labelLarge!
+          .copyWith(color: theme.colorScheme.onPrimary),
       shape: _DiamondBorder(),
       child: result,
     );
 
-    if (widget.heroTag != null) {
-      result = Hero(
-        tag: widget.heroTag,
-        child: result,
-      );
-    }
+    result = Hero(
+      tag: widget.heroTag,
+      child: result,
+    );
 
     return result;
   }
 
   @override
   void deactivate() {
-    if (_notchChange != null) {
-      _notchChange();
+    if(_notchChange!=null){
+      _notchChange!();
     }
     super.deactivate();
   }
@@ -114,9 +101,8 @@ class DiamondFabState extends State<DiamondFab> {
     //    Scaffold.setFloatingActionButtonNotchFor(context, _computeNotch);
   }
 
-  // Draws the Notch.
-  void _handleHightlightChanged(bool value) {
-    setState(() => _hightlight = value);
+  void _handleHighlightChanged(bool value) {
+    setState(() => _highlight = value);
   }
 }
 
@@ -128,15 +114,15 @@ class _DefaultHeroTag {
 
 class _DiamondBorder extends ShapeBorder {
   @override
-  EdgeInsetsGeometry get dimensions => EdgeInsets.only();
+  EdgeInsetsGeometry get dimensions => EdgeInsets.zero;
 
   @override
-  Path getInnerPath(Rect rect, {required TextDirection textDirection}) {
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
     return getOuterPath(rect, textDirection: textDirection);
   }
 
   @override
-  Path getOuterPath(Rect rect, {required TextDirection textDirection}) {
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
     return Path()
       ..moveTo(rect.left + rect.width / 2.0, rect.top)
       ..lineTo(rect.right, rect.top + rect.height / 2.0)
@@ -146,10 +132,13 @@ class _DiamondBorder extends ShapeBorder {
   }
 
   @override
-  void paint(Canvas canvas, Rect rect, {required TextDirection textDirection}) {}
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {}
 
   @override
-  ShapeBorder? scale(double t) {
-    return null;
+  ShapeBorder scale(double t) {
+    // TODO: implement scale
+    return this;
+    //throw UnimplementedError();
   }
+
 }

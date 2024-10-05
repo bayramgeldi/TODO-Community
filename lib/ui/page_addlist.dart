@@ -5,14 +5,15 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
-import 'package:modal_progress_hud/modal_progress_hud.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
 
-import 'package:connectivity/connectivity.dart';
+
 
 class NewTaskPage extends StatefulWidget {
-  final FirebaseUser user;
+  final User user;
 
-  NewTaskPage({Key key, this.user}) : super(key: key);
+  NewTaskPage({required Key key, required this.user}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _NewTaskPageState();
@@ -25,13 +26,13 @@ class _NewTaskPageState extends State<NewTaskPage> {
   Color pickerColor = Color(0xff6633ff);
   Color currentColor = Color(0xff6633ff);
 
-  ValueChanged<Color> onColorChanged;
+  late ValueChanged<Color> onColorChanged;
 
   bool _saving = false;
 
   String _connectionStatus = 'Unknown';
   final Connectivity _connectivity = new Connectivity();
-  StreamSubscription<ConnectivityResult> _connectivitySubscription;
+  late StreamSubscription<List<ConnectivityResult>> _connectivitySubscription;
 
   Future<Null> initConnectivity() async {
     String connectionStatus;
@@ -72,19 +73,19 @@ class _NewTaskPageState extends State<NewTaskPage> {
       bool isExist = false;
 
       QuerySnapshot query =
-      await Firestore.instance.collection(widget.user.uid).getDocuments();
+      await FirebaseFirestore.instance.collection(widget.user.uid).get();
 
-      query.documents.forEach((doc) {
-        if (listNameController.text.toString() == doc.documentID) {
+      query.docs.forEach((doc) {
+        if (listNameController.text.toString() == doc.id) {
           isExist = true;
         }
       });
 
       if (isExist == false && listNameController.text.isNotEmpty) {
-        await Firestore.instance
+        await FirebaseFirestore.instance
             .collection(widget.user.uid)
-            .document(listNameController.text.toString().trim())
-            .setData({
+            .doc(listNameController.text.toString().trim())
+            .set({
           "color": currentColor.value.toString(),
           "date": DateTime.now().millisecondsSinceEpoch
         });
@@ -195,8 +196,7 @@ class _NewTaskPageState extends State<NewTaskPage> {
                           ),
                           ButtonTheme(
                             minWidth: double.infinity,
-                            child: RaisedButton(
-                              elevation: 3.0,
+                            child: ElevatedButton(
                               onPressed: () {
                                 pickerColor = currentColor;
                                 showDialog(
@@ -208,13 +208,12 @@ class _NewTaskPageState extends State<NewTaskPage> {
                                         child: ColorPicker(
                                           pickerColor: pickerColor,
                                           onColorChanged: changeColor,
-                                          enableLabel: true,
                                           colorPickerWidth: 1000.0,
                                           pickerAreaHeightPercent: 0.7,
                                         ),
                                       ),
                                       actions: <Widget>[
-                                        FlatButton(
+                                        TextButton(
                                           child: Text('Got it'),
                                           onPressed: () {
                                             setState(() =>
@@ -228,8 +227,8 @@ class _NewTaskPageState extends State<NewTaskPage> {
                                 );
                               },
                               child: Text('Card color'),
-                              color: currentColor,
-                              textColor: const Color(0xffffffff),
+                              //color: currentColor,
+                              //textColor: const Color(0xffffffff),
                             ),
                           ),
                         ],
@@ -239,14 +238,14 @@ class _NewTaskPageState extends State<NewTaskPage> {
                       padding: EdgeInsets.only(top: 50.0),
                       child: new Column(
                         children: <Widget>[
-                          new RaisedButton(
+                          new ElevatedButton(
                             child: const Text(
                               'Add',
                               style: TextStyle(color: Colors.white),
                             ),
-                            color: Colors.blue,
-                            elevation: 4.0,
-                            splashColor: Colors.deepPurple,
+                            //color: Colors.blue,
+                            //elevation: 4.0,
+                            //splashColor: Colors.deepPurple,
                             onPressed: addToFirebase,
                           ),
                         ],
@@ -267,8 +266,7 @@ class _NewTaskPageState extends State<NewTaskPage> {
 
   @override
   void dispose() {
-    _scaffoldKey.currentState?.dispose();
-    _connectivitySubscription?.cancel();
+    _connectivitySubscription.cancel();
     super.dispose();
   }
 
@@ -277,18 +275,18 @@ class _NewTaskPageState extends State<NewTaskPage> {
     super.initState();
     initConnectivity();
     _connectivitySubscription =
-        _connectivity.onConnectivityChanged.listen((ConnectivityResult result) {
+        _connectivity.onConnectivityChanged.listen((List<ConnectivityResult> results) {
           setState(() {
-            _connectionStatus = result.toString();
+            _connectionStatus = results.first.toString();
           });
         });
   }
 
   void showInSnackBar(String value) {
-    _scaffoldKey.currentState?.removeCurrentSnackBar();
+  ScaffoldMessenger.of(context).hideCurrentSnackBar();
 
-    _scaffoldKey.currentState?.showSnackBar(new SnackBar(
-      content: new Text(value, textAlign: TextAlign.center),
+  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text(value, textAlign: TextAlign.center),
       backgroundColor: currentColor,
       duration: Duration(seconds: 3),
     ));

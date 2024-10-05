@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
@@ -8,12 +10,12 @@ import 'package:taskist/model/element.dart';
 import 'package:taskist/utils/diamond_fab.dart';
 
 class DetailPage extends StatefulWidget {
-  final FirebaseUser user;
+  final User user;
   final int i;
   final Map<String, List<ElementTask>> currentList;
   final String color;
 
-  DetailPage({Key key, this.user, this.i, this.currentList, this.color})
+  DetailPage({required Key key, required this.user, required this.i, required this.currentList, required this.color})
       : super(key: key);
 
   @override
@@ -34,10 +36,11 @@ class _DetailPageState extends State<DetailPage> {
           Container(
             child: NotificationListener<OverscrollIndicatorNotification>(
               onNotification: (overscroll) {
-                overscroll.disallowGlow();
+                overscroll.disallowIndicator();
+                return false;
               },
               child: new StreamBuilder<QuerySnapshot>(
-                  stream: Firestore.instance
+                  stream: FirebaseFirestore.instance
                       .collection(widget.user.uid)
                       .snapshots(),
                   builder: (BuildContext context,
@@ -92,17 +95,16 @@ class _DetailPageState extends State<DetailPage> {
                 actions: <Widget>[
                   ButtonTheme(
                     //minWidth: double.infinity,
-                    child: RaisedButton(
-                      elevation: 3.0,
+                    child: ElevatedButton(
                       onPressed: () {
                         if (itemController.text.isNotEmpty &&
                             !widget.currentList.values
                                 .contains(itemController.text.toString())) {
-                          Firestore.instance
+                          FirebaseFirestore.instance
                               .collection(widget.user.uid)
-                              .document(
+                              .doc(
                                   widget.currentList.keys.elementAt(widget.i))
-                              .updateData(
+                              .update(
                                   {itemController.text.toString(): false});
 
                           itemController.clear();
@@ -110,8 +112,8 @@ class _DetailPageState extends State<DetailPage> {
                         }
                       },
                       child: Text('Add'),
-                      color: currentColor,
-                      textColor: const Color(0xffffffff),
+                      //color: currentColor,
+                      //textColor: const Color(0xffffffff),
                     ),
                   )
                 ],
@@ -120,7 +122,7 @@ class _DetailPageState extends State<DetailPage> {
           );
         },
         child: Icon(Icons.add),
-        backgroundColor: currentColor,
+        backgroundColor: currentColor, foregroundColor: currentColor, tooltip: 'Add new item',
       ),
     );
   }
@@ -131,17 +133,19 @@ class _DetailPageState extends State<DetailPage> {
   }
 
   getExpenseItems(AsyncSnapshot<QuerySnapshot> snapshot) {
-    List<ElementTask> listElement = new List();
+    List<ElementTask> listElement = [];
     int nbIsDone = 0;
 
     if (widget.user.uid.isNotEmpty) {
-      snapshot.data.documents.map<Column>((f) {
-        if (f.documentID == widget.currentList.keys.elementAt(widget.i)) {
-          f.data.forEach((a, b) {
+      snapshot.data!.docs.map((f) {
+        if (f.id == widget.currentList.keys.elementAt(widget.i)) {
+          //dummy data
+          listElement.add(new ElementTask("Task 1", false));
+/*          f.data.forEach((a, b) {
             if (b.runtimeType == bool) {
               listElement.add(new ElementTask(a, b));
             }
-          });
+          });*/
         }
       }).toList();
 
@@ -184,32 +188,30 @@ class _DetailPageState extends State<DetailPage> {
                                 actions: <Widget>[
                                   ButtonTheme(
                                     //minWidth: double.infinity,
-                                    child: RaisedButton(
-                                      elevation: 3.0,
+                                    child: ElevatedButton(
                                       onPressed: () {
                                         Navigator.pop(context);
                                       },
                                       child: Text('No'),
-                                      color: currentColor,
-                                      textColor: const Color(0xffffffff),
+                                      //color: currentColor,
+                                      //textColor: const Color(0xffffffff),
                                     ),
                                   ),
                                   ButtonTheme(
                                     //minWidth: double.infinity,
-                                    child: RaisedButton(
-                                      elevation: 3.0,
+                                    child: ElevatedButton(
                                       onPressed: () {
-                                        Firestore.instance
+                                        FirebaseFirestore.instance
                                             .collection(widget.user.uid)
-                                            .document(widget.currentList.keys
+                                            .doc(widget.currentList.keys
                                             .elementAt(widget.i))
                                             .delete();
                                         Navigator.pop(context);
                                         Navigator.of(context).pop();
                                       },
                                       child: Text('YES'),
-                                      color: currentColor,
-                                      textColor: const Color(0xffffffff),
+                                      //color: currentColor,
+                                      //textColor: const Color(0xffffffff),
                                     ),
                                   ),
                                 ],
@@ -267,15 +269,13 @@ class _DetailPageState extends State<DetailPage> {
                             itemCount: listElement.length,
                             itemBuilder: (BuildContext ctxt, int i) {
                               return new Slidable(
-                                delegate: new SlidableBehindDelegate(),
-                                actionExtentRatio: 0.25,
                                 child: GestureDetector(
                                   onTap: () {
-                                    Firestore.instance
+                                    FirebaseFirestore.instance
                                         .collection(widget.user.uid)
-                                        .document(widget.currentList.keys
+                                        .doc(widget.currentList.keys
                                             .elementAt(widget.i))
-                                        .updateData({
+                                        .update({
                                       listElement.elementAt(i).name:
                                           !listElement.elementAt(i).isDone
                                     });
@@ -293,7 +293,7 @@ class _DetailPageState extends State<DetailPage> {
                                         children: <Widget>[
                                           Icon(
                                             listElement.elementAt(i).isDone
-                                                ? FontAwesomeIcons.checkSquare
+                                                ? FontAwesomeIcons.squareCheck
                                                 : FontAwesomeIcons.square,
                                             color: listElement
                                                     .elementAt(i)
@@ -331,23 +331,27 @@ class _DetailPageState extends State<DetailPage> {
                                     ),
                                   ),
                                 ),
-                                secondaryActions: <Widget>[
-                                  new IconSlideAction(
-                                    caption: 'Delete',
-                                    color: Colors.red,
-                                    icon: Icons.delete,
-                                    onTap: () {
-                                        Firestore.instance
+                                endActionPane: ActionPane(
+                                  motion: ScrollMotion(),
+                                  children: <Widget>[
+                                    SlidableAction(
+                                      flex: 1,
+                                      autoClose: true,
+                                      onPressed: (context) {
+                                        FirebaseFirestore.instance
                                             .collection(widget.user.uid)
-                                            .document(widget.currentList.keys
+                                            .doc(widget.currentList.keys
                                             .elementAt(widget.i))
-                                            .updateData({
-                                          listElement.elementAt(i).name:
-                                          ""
+                                            .update({
+                                          listElement.elementAt(i).name: false
                                         });
-                                    },
-                                  ),
-                                ],
+                                      },
+                                      foregroundColor: Colors.red,
+                                      backgroundColor: Colors.transparent,
+                                      icon: Icons.delete,
+                                    ),
+                                  ],
+                                ),
                               );
                             }),
                       ),),
@@ -369,10 +373,10 @@ class _DetailPageState extends State<DetailPage> {
     currentColor = Color(int.parse(widget.color));
   }
 
-  Color pickerColor;
-  Color currentColor;
+  late Color pickerColor;
+  late Color currentColor;
 
-  ValueChanged<Color> onColorChanged;
+  late ValueChanged<Color> onColorChanged;
 
   changeColor(Color color) {
     setState(() => pickerColor = color);
@@ -389,8 +393,7 @@ class _DetailPageState extends State<DetailPage> {
                 fit: BoxFit.cover,
                 image: new AssetImage('assets/list.png')
             ),
-        RaisedButton(
-          elevation: 3.0,
+        ElevatedButton(
           onPressed: () {
             pickerColor = currentColor;
             showDialog(
@@ -402,21 +405,20 @@ class _DetailPageState extends State<DetailPage> {
                     child: ColorPicker(
                       pickerColor: pickerColor,
                       onColorChanged: changeColor,
-                      enableLabel: true,
                       colorPickerWidth: 1000.0,
                       pickerAreaHeightPercent: 0.7,
                     ),
                   ),
                   actions: <Widget>[
-                    FlatButton(
+                    TextButton(
                       child: Text('Got it'),
                       onPressed: () {
 
-                        Firestore.instance
+                        FirebaseFirestore.instance
                             .collection(widget.user.uid)
-                            .document(
+                            .doc(
                             widget.currentList.keys.elementAt(widget.i))
-                            .updateData(
+                            .update(
                             {"color": pickerColor.value.toString()});
 
                         setState(
@@ -430,8 +432,8 @@ class _DetailPageState extends State<DetailPage> {
             );
           },
           child: Text('Color'),
-          color: currentColor,
-          textColor: const Color(0xffffffff),
+          //color: currentColor,
+          //textColor: const Color(0xffffffff),
         ),
         GestureDetector(
           onTap: () {

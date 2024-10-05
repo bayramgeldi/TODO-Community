@@ -3,15 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
-import 'package:share/share.dart';
 import 'package:launch_review/launch_review.dart';
-
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 class SettingsPage extends StatefulWidget {
-  final FirebaseUser user;
+  final User user;
 
-  SettingsPage({Key key, this.user}) : super(key: key);
+  SettingsPage({required Key key, required this.user}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _SettingsPageState();

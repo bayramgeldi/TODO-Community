@@ -7,9 +7,9 @@ import 'package:taskist/model/element.dart';
 import 'package:taskist/ui/page_detail.dart';
 
 class DonePage extends StatefulWidget {
-  final FirebaseUser user;
+  final User user;
 
-  DonePage({Key key, this.user}) : super(key: key);
+  DonePage({required Key key, required this.user}) : super(key: key);
 
   @override
   State<StatefulWidget> createState() => _DonePageState();
@@ -74,10 +74,11 @@ class _DonePageState extends State<DonePage>
               padding: EdgeInsets.only(bottom: 25.0),
               child: NotificationListener<OverscrollIndicatorNotification>(
                 onNotification: (overscroll) {
-                  overscroll.disallowGlow();
+                  overscroll.disallowIndicator();
+                  return false;
                 },
                 child: new StreamBuilder<QuerySnapshot>(
-                    stream: Firestore.instance
+                    stream: FirebaseFirestore.instance
                         .collection(widget.user.uid).orderBy("date", descending: true)
                         .snapshots(),
                     builder: (BuildContext context,
@@ -108,28 +109,31 @@ class _DonePageState extends State<DonePage>
   }
 
   getExpenseItems(AsyncSnapshot<QuerySnapshot> snapshot) {
-    List<ElementTask> listElement = new List(), listElement2;
+    List<ElementTask> listElement = [], listElement2;
     Map<String, List<ElementTask>> userMap = new Map();
 
-    List<String> cardColor = new List();
+    List<String> cardColor = [];
     if (widget.user.uid.isNotEmpty) {
       cardColor.clear();
 
-      snapshot.data.documents.map<List>((f) {
-        f.data.forEach((a, b) {
+      snapshot.data?.docs.map((f) {
+
+        //add dummy data
+        listElement.add(new ElementTask("Task 1", false));
+       /* f.data!.forEach((a, b) {
           if (b.runtimeType == bool) {
             listElement.add(new ElementTask(a, b));
           }
           if (b.runtimeType == String && a == "color") {
             cardColor.add(b);
           }
-        });
+        });*/
         listElement2 = new List<ElementTask>.from(listElement);
-        userMap[f.documentID] = listElement2;
+        userMap[f.id] = listElement2;
 
         for (int i = 0; i < listElement2.length; i++) {
           if (listElement2.elementAt(i).isDone == false) {
-            userMap.remove(f.documentID);
+            userMap.remove(f.id);
             if (cardColor.isNotEmpty) {
               cardColor.removeLast();
             }
@@ -138,11 +142,11 @@ class _DonePageState extends State<DonePage>
           }
         }
         if (listElement2.length == 0) {
-          userMap.remove(f.documentID);
+          userMap.remove(f.id);
           cardColor.removeLast();
         }
         listElement.clear();
-      }).toList();
+      }).toList() ?? [];
 
       return new List.generate(userMap.length, (int index) {
         return new GestureDetector(
@@ -153,7 +157,7 @@ class _DonePageState extends State<DonePage>
                       user: widget.user,
                       i: index,
                       currentList: userMap,
-                      color: cardColor.elementAt(index),
+                      color: cardColor.elementAt(index), key: Key("done"),
                     ),
                 transitionsBuilder:
                     (context, animation, secondaryAnimation, child) =>
@@ -249,7 +253,7 @@ class _DonePageState extends State<DonePage>
                                                 .elementAt(index)
                                                 .elementAt(i)
                                                 .isDone
-                                            ? FontAwesomeIcons.checkCircle
+                                            ? FontAwesomeIcons.circleCheck
                                             : FontAwesomeIcons.circle,
                                         color: userMap.values
                                                 .elementAt(index)
