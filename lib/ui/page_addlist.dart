@@ -163,7 +163,7 @@ class _NewTaskPageState extends State<NewTaskPage> {
 
     //log function to see the response from the model
     late List<ElementTask> elementTasks = [];
-     Task? newTask;
+    Task? newTask;
     for (final content in response.functionCalls) {
       log('Response: ${content.name}');
       content.args.forEach((key, value) {
@@ -311,6 +311,15 @@ class _NewTaskPageState extends State<NewTaskPage> {
                             decoration: InputDecoration(
                                 border: new OutlineInputBorder(),
                                 labelText: "List name",
+                                suffixIcon: GestureDetector(
+                                  onTap: listNameController.text.length > 0
+                                      ? addUsingAI
+                                      : null,
+                                  child: Icon(Icons.auto_awesome,
+                                      color: listNameController.text.length > 0
+                                          ? Colors.blueAccent
+                                          : Colors.grey),
+                                ),
                                 contentPadding: EdgeInsets.only(
                                     left: 16.0,
                                     top: 20.0,

@@ -28,6 +28,15 @@ class Task {
       elements: (f.get('elements') as List).map((e) => ElementTask.fromJson(e)).toList(),
     );
   }
+  factory Task.fromDocumentSnapshot(DocumentSnapshot<Object?> f) {
+    return Task(
+      title: f.get("title"),
+      description: f.get("description"),
+      date: DateTime.fromMillisecondsSinceEpoch(f.get("date")),
+      color: f.get("color"),
+      elements: (f.get('elements') as List).map((e) => ElementTask.fromJson(e)).toList(),
+    );
+  }
 
 
 

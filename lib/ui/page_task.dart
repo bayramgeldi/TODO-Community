@@ -152,23 +152,12 @@ class _TaskPageState extends State<TaskPage>
 
 
         snapshot.data?.docs.map((QueryDocumentSnapshot f) {
-          log(f.data().runtimeType.toString());
-          log(f.get("title"));
+
           task = Task.fromQueryDocumentSnapshot(f);
           listElement = task.elements;
           late String color;
-          //add dummy data
-          //listElement.add(new ElementTask("Task 1", false));
           color = task.color;
 
-          /*f.data().forEach((a, b) {
-            if (b.runtimeType == bool) {
-              listElement.add(new ElementTask(a, b));
-            }
-            if (b.runtimeType == String && a == "color") {
-              color = b;
-            }
-          });*/
           listElement2 = new List<ElementTask>.from(listElement);
           for (int i = 0; i < listElement2.length; i++) {
             if (listElement2

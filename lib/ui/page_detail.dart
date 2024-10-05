@@ -108,14 +108,17 @@ class _DetailPageState extends State<DetailPage> {
                   ButtonTheme(
                     //minWidth: double.infinity,
                     child: ElevatedButton(
-                      onPressed: () {
+                      onPressed: () async {
                         if (itemController.text.isNotEmpty &&
                             !widget.currentList.values
                                 .contains(itemController.text.toString())) {
                           //add new item to the task
                           var taskElements = widget.task.elements;
+                          //get the current task elements
+                          final dataSnapshot = await FirebaseFirestore.instance.collection(widget.user.uid).doc(widget.currentList.keys.elementAt(widget.i)).get().then((value) => value.data()!["elements"]);
+                          taskElements = dataSnapshot.map<ElementTask>((e) => ElementTask.fromJson(e)).toList();
                           taskElements.add(ElementTask(name: itemController.text.toString(), isDone: false));
-
+                          widget.task.elements = taskElements;
                           FirebaseFirestore.instance.collection(widget.user.uid).doc(widget.currentList.keys.elementAt(widget.i)).update({"elements": taskElements.map((e) => e.toJson()).toList()});
 
                           itemController.clear();
@@ -249,6 +252,13 @@ class _DetailPageState extends State<DetailPage> {
                   padding: EdgeInsets.only(top: 5.0, left: 50.0),
                   child: Row(
                     children: <Widget>[
+                      CircularProgressIndicator(
+                        value: listElement.length == 0 ? 0.0 : nbIsDone / listElement.length,
+                        backgroundColor: Colors.grey,
+                        valueColor: AlwaysStoppedAnimation<Color>(currentColor),
+                        color: currentColor,
+                      ),
+                      Padding(padding: EdgeInsets.only(left: 10.0)),
                       new Text(
                         nbIsDone.toString() +
                             " of " +
@@ -289,8 +299,6 @@ class _DetailPageState extends State<DetailPage> {
                                 return new Slidable(
                                   child: GestureDetector(
                                     onTap: () {
-                                      log("done: "+i.toString());
-                                      log(listElement.elementAt(i).toString());
                                       var taskElement = listElement.elementAt(i);
                                       taskElement.isDone = !taskElement.isDone;
                                       listElement[i] = taskElement;
@@ -359,16 +367,15 @@ class _DetailPageState extends State<DetailPage> {
                                         flex: 1,
                                         autoClose: true,
                                         onPressed: (context) {
+                                          listElement.removeAt(i);
                                           FirebaseFirestore.instance
                                               .collection(widget.user.uid)
                                               .doc(widget.currentList.keys
                                                   .elementAt(widget.i))
-                                              .update({
-                                            listElement.elementAt(i).name: false
-                                          });
+                                              .update({"elements": listElement.map((e) => e.toJson()).toList()});
                                         },
                                         foregroundColor: Colors.red,
-                                        backgroundColor: Colors.transparent,
+                                        backgroundColor: Colors.red.withOpacity(0.1),
                                         icon: Icons.delete,
                                       ),
                                     ],
@@ -449,6 +456,12 @@ class _DetailPageState extends State<DetailPage> {
             );
           },
           child: Text('Color'),
+          style: ElevatedButton.styleFrom(
+            foregroundColor: Colors.white,
+            backgroundColor: currentColor,
+            disabledForegroundColor: Colors.grey.withOpacity(0.38),
+            disabledBackgroundColor: Colors.grey.withOpacity(0.12),
+          ),
           //color: currentColor,
           //textColor: const Color(0xffffffff),
         ),
