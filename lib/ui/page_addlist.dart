@@ -7,7 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:modal_progress_hud_nsn/modal_progress_hud_nsn.dart';
-import 'package:taskist/model/task.dart';
+import 'package:todo_community_ai_app/model/task.dart';
 
 class NewTaskPage extends StatefulWidget {
   final User user;

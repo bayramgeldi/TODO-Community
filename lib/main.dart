@@ -4,9 +4,9 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:taskist/ui/page_done.dart';
-import 'package:taskist/ui/page_settings.dart';
-import 'package:taskist/ui/page_task.dart';
+import 'package:todo_community_ai_app/ui/page_done.dart';
+import 'package:todo_community_ai_app/ui/page_settings.dart';
+import 'package:todo_community_ai_app/ui/page_task.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -17,7 +17,7 @@ Future<Null> main() async {
   );
   _currentUser = await _signInAnonymously();
 
-  runApp(new TaskistApp());
+  runApp(new TODOCommunityAIApp());
 }
 final FirebaseAuth _auth = FirebaseAuth.instance;
 
@@ -38,12 +38,12 @@ class HomePage extends StatefulWidget {
   State<StatefulWidget> createState() => _HomePageState();
 }
 
-class TaskistApp extends StatelessWidget {
+class TODOCommunityAIApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: "Taskist",
+      title: "TODO Community AI",
       home: HomePage(
         user: _currentUser, key: Key("HomePage"),
       ),
