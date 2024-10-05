@@ -26,13 +26,14 @@ class _SettingsPageState extends State<SettingsPage>
 
   rateApp() async {
     LaunchReview.launch(
-        androidAppId: "com.huextrat.taskist", iOSAppId: "1435481664");
+        androidAppId: "com.bayramgeldi.todo_community_ai", iOSAppId: "1435481664");
   }
 
   _launchURL() async {
-    const url = 'https://twitter.com/HugoExtrat';
-    if (await canLaunch(url)) {
-      await launch(url);
+    final url = Uri.parse('https://twitter.com/bayramgeldii');
+
+    if (await canLaunchUrl(url)) {
+      await launchUrl(url);
     } else {
       throw 'Could not launch $url';
     }
@@ -102,8 +103,8 @@ class _SettingsPageState extends State<SettingsPage>
                   children: <Widget>[
                     ListTile(
                       leading: Icon(
-                        FontAwesomeIcons.cogs,
-                        color: Colors.grey,
+                        FontAwesomeIcons.gears,
+                        color: Colors.deepPurple,
                       ),
                       title: Text("Version"),
                       trailing: Text("1.0.0"),
@@ -111,17 +112,17 @@ class _SettingsPageState extends State<SettingsPage>
                     ListTile(
                       onTap: _launchURL,
                       leading: Icon(
-                        FontAwesomeIcons.twitter,
-                        color: Colors.blue,
+                        FontAwesomeIcons.xTwitter,
+                        color: Colors.black,
                       ),
-                      title: Text("Twitter"),
+                      title: Text("@bayramgeldii"),
                       trailing: Icon(Icons.arrow_right),
                     ),
                     ListTile(
                       onTap: rateApp,
                       leading: Icon(
                         FontAwesomeIcons.star,
-                        color: Colors.blue,
+                        color: Colors.deepPurple,
                       ),
                       title: Text("Rate TODO Community AI"),
                       trailing: Icon(Icons.arrow_right),
@@ -129,8 +130,8 @@ class _SettingsPageState extends State<SettingsPage>
                     ListTile(
                       onTap: sharePage,
                       leading: Icon(
-                        FontAwesomeIcons.shareAlt,
-                        color: Colors.blue,
+                        FontAwesomeIcons.shareNodes,
+                        color: Colors.deepPurple,
                       ),
                       title: Text("Share TODO Community AI"),
                       trailing: Icon(Icons.arrow_right),

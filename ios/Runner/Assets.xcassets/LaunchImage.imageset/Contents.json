@@ -1,13 +1,13 @@
 {
   "images" : [
     {
+      "filename" : "task-list_9329773.png",
       "idiom" : "universal",
-      "filename" : "76.jpg",
       "scale" : "1x"
     },
     {
+      "filename" : "task_big.png",
       "idiom" : "universal",
-      "filename" : "152.jpg",
       "scale" : "2x"
     },
     {
@@ -16,7 +16,7 @@
     }
   ],
   "info" : {
-    "version" : 1,
-    "author" : "xcode"
+    "author" : "xcode",
+    "version" : 1
   }
 }

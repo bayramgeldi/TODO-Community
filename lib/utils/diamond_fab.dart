@@ -63,7 +63,7 @@ class DiamondFabState extends State<DiamondFab> {
         message: widget.tooltip,
         child: result,
       );
-      result = widget.child != null ? tooltip : SizedBox.expand(child: tooltip);
+      result =  tooltip;
     }
 
     result = RawMaterialButton(
