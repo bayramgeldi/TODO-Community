@@ -9,14 +9,9 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="d72d5de6-a713-4718-bcab-1e3972bee4f1" name="Default" comment="upgrade and some compatibility fixes">
-      <change afterPath="$PROJECT_DIR$/lib/model/task.dart" afterDir="false" />
+    <list default="true" id="d72d5de6-a713-4718-bcab-1e3972bee4f1" name="Default" comment="fixes on models">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/model/element.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/model/element.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/page_addlist.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ui/page_addlist.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/page_detail.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ui/page_detail.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/page_done.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ui/page_done.dart" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/lib/ui/page_task.dart" beforeDir="false" afterPath="$PROJECT_DIR$/lib/ui/page_task.dart" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -303,7 +298,15 @@
       <option name="project" value="LOCAL" />
       <updated>1728118676046</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="fixes on models">
+      <option name="closed" value="true" />
+      <created>1728128815165</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1728128815165</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -345,7 +348,8 @@
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="upgrade and some compatibility fixes" />
-    <option name="LAST_COMMIT_MESSAGE" value="upgrade and some compatibility fixes" />
+    <MESSAGE value="fixes on models" />
+    <option name="LAST_COMMIT_MESSAGE" value="fixes on models" />
   </component>
   <component name="editorHistoryManager">
     <entry file="file://$PROJECT_DIR$/android/app/src/main/AndroidManifest.xml">
