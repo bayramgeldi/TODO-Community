@@ -11,6 +11,8 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
+  change_app_package_name: ^1.4.0
+  firebase_vertexai: ^0.2.3+4
 
 dev_dependencies:
   flutter_test:
