@@ -1,5 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:taskist/model/element.dart';
+import 'package:todo_community_ai_app/model/element.dart';
 
 class Task {
   String title;

@@ -21,7 +21,7 @@ class _SettingsPageState extends State<SettingsPage>
 
   sharePage() async {
     Share.share(
-        "Toi aussi organise mieux tes journées avec #Taskist disponible sur Android et iOS");
+        "You too can organize your days better with #TODOCommunityAI available on Android and iOS");
   }
 
   rateApp() async {
@@ -123,7 +123,7 @@ class _SettingsPageState extends State<SettingsPage>
                         FontAwesomeIcons.star,
                         color: Colors.blue,
                       ),
-                      title: Text("Rate Taskist"),
+                      title: Text("Rate TODO Community AI"),
                       trailing: Icon(Icons.arrow_right),
                     ),
                     ListTile(
@@ -132,7 +132,7 @@ class _SettingsPageState extends State<SettingsPage>
                         FontAwesomeIcons.shareAlt,
                         color: Colors.blue,
                       ),
-                      title: Text("Share Taskist"),
+                      title: Text("Share TODO Community AI"),
                       trailing: Icon(Icons.arrow_right),
                     ),
                   ],

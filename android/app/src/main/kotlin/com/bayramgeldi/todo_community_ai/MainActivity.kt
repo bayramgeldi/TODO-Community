@@ -1,4 +1,4 @@
-package com.huextrat.taskist
+package com.bayramgeldi.todo_community_ai
 
 import android.os.Bundle
 

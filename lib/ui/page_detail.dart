@@ -7,9 +7,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:taskist/model/element.dart';
-import 'package:taskist/model/task.dart';
-import 'package:taskist/utils/diamond_fab.dart';
+import 'package:todo_community_ai_app/model/element.dart';
+import 'package:todo_community_ai_app/model/task.dart';
+import 'package:todo_community_ai_app/utils/diamond_fab.dart';
 
 class DetailPage extends StatefulWidget {
   final User user;
